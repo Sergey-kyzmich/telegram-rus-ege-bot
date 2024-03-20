@@ -1,4 +1,3 @@
-import asyncio
 import json
 import random
 import time
@@ -184,40 +183,33 @@ def off_all_timer(message):
 
 @bot.message_handler(commands="on_all_timer")
 def on_all_timer(message):
-    if message.chat.id == 5173778472:
-        bot.send_message(message.chat.id, text="Рассылка активированна!")
-        print("Рассылка активированна!")
+    bot.send_message(message.chat.id, text="Рассылка активированна!")
+    print("Рассылка активированна!")
+    total = check_time()
+    if total<0:
+        print(f"{total=}")
+        time.sleep(abs(int(total)))
+    # print(message.chat.id)
+    while True:
+        with open("id_list.json", "r") as f:
+            d = json.load(f)
+        user_list = d
+        print("Активные каналы:", d)
+        for id in user_list:
+            if id != "all":
+                if user_list[id]==True:
+                    message.chat.id = int(id)
+                    msg = bot.send_message(message.chat.id, "Загрузка...")
+                    send(msg, call(message, "task_random"), "")
         total = check_time()
-        if total<0:
-            print(f"{total=}")
-            time.sleep(abs(int(total)))
-        # print(message.chat.id)
-        while True:
-            with open("id_list.json", "r") as f:
-                d = json.load(f)
-            user_list = d
-            print("Активные каналы:", d)
-            for id in user_list:
-                if id != "all":
-                    if user_list[id]==True:
-                        message.chat.id = int(id)
-                        msg = bot.send_message(message.chat.id, "Загрузка...")
-                        send(msg, call(message, "task_random"), "")
-            total = check_time()
-            # print(total)
-            print("wait", 24*3600-int(total))
-            time.sleep(24*3600-int(total))
-            if datetime.datetime.now().weekday() in [5,6]:
-                time.sleep(3*3600)
+        # print(total)
+        print("wait", 24*3600-int(total))
+        time.sleep(24*3600-int(total))
+        if datetime.datetime.now().weekday() in [5,6]:
+            time.sleep(3*3600)
 
 @bot.message_handler(commands="help")
 def help(message):
-    text_1 = """
-/help - Список команд
-/start - старт бота(+показать кнопку с командой /create_task)
-/create_task - создать задание
-/on_timer - Активировать рассылку 1-го рандомного задания в 8:10 по МСК
-/off_timer - Отключить рассылку"""
     text_2 = """
 /help - Список команд
 /start - старт бота(+показать кнопку с командой /create_task)
@@ -226,8 +218,5 @@ def help(message):
 /off_timer - Отключить рассылку
 /on_all_timer - Активировать рассылку
 /off_all_timer - Отключить рассылку"""
-    if message.chat.id == 5173778472:
-        bot.send_message(message.chat.id, text=text_2)
-    else:
-        bot.send_message(message.chat.id, text=text_1)
+    bot.send_message(message.chat.id, text=text_2)
 bot.infinity_polling()
